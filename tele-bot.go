@@ -172,7 +172,7 @@ func addRequest(chatID int64, firstName string, lastName string) string {
 	for data.Next() {
 		return "Request pending!"
 	}
-	_, err = dbConn.Query("INSERT INTO signUps (chatId, firstName, lastName) VALUES (?, ?, ?)", chatID, firstName, lastName)
+	_, err = dbConn.Exec("INSERT INTO signUps (chatId, firstName, lastName) VALUES (?, ?, ?)", chatID, firstName, lastName)
 	failOnError(err, "Error inserting request!")
 	return "Request added to pool"
 }
