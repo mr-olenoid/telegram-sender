@@ -161,21 +161,18 @@ func rabbitConn(ip string, port string, user string, password string) (msgs <-ch
 
 func addRequest(chatID int64, firstName string, lastName string) string {
 	dbConn := connectToDatabase()
-	query := fmt.Sprintf("SELECT * FROM subscribers WHERE chatid=%d", chatID)
-	data, err := dbConn.Query(query)
+	data, err := dbConn.Query("SELECT * FROM subscribers WHERE chatid=?", chatID)
 	failOnError(err, "Error checking subsribers!")
 	defer data.Close()
 	for data.Next() {
 		return "Already subscribed!"
 	}
-	query = fmt.Sprintf("SELECT * FROM signUps WHERE chatid=%d", chatID)
-	data, err = dbConn.Query(query)
+	data, err = dbConn.Query("SELECT * FROM signUps WHERE chatid=?", chatID)
 	failOnError(err, "Error selecting signUps!")
 	for data.Next() {
 		return "Request pending!"
 	}
-	query = fmt.Sprintf("INSERT INTO signUps (chatId, firstName, lastName) VALUES (%d, '%s', '%s')", chatID, firstName, lastName)
-	_, err = dbConn.Query(query)
+	_, err = dbConn.Query("INSERT INTO signUps (chatId, firstName, lastName) VALUES (?, ?, ?)", chatID, firstName, lastName)
 	failOnError(err, "Error inserting request!")
 	return "Request added to pool"
 }
