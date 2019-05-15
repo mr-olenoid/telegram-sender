@@ -161,13 +161,13 @@ func rabbitConn(ip string, port string, user string, password string) (msgs <-ch
 
 func addRequest(chatID int64, firstName string, lastName string) string {
 	dbConn := connectToDatabase()
-	data, err := dbConn.Query("SELECT * FROM subscribers WHERE chatid=?", chatID)
+	data, err := dbConn.Query("SELECT * FROM subscribers WHERE chatid = ?", chatID)
 	failOnError(err, "Error checking subsribers!")
 	defer data.Close()
 	for data.Next() {
 		return "Already subscribed!"
 	}
-	data, err = dbConn.Query("SELECT * FROM signUps WHERE chatid=?", chatID)
+	data, err = dbConn.Query("SELECT * FROM signUps WHERE chatid = ?", chatID)
 	failOnError(err, "Error selecting signUps!")
 	for data.Next() {
 		return "Request pending!"
