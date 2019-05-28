@@ -24,6 +24,7 @@ type message struct {
 	Message  string `json:"message"`
 	Origin   string `json:"origin"`
 	Severity string `json:"severity"`
+	Format   string `json:"format"`
 }
 
 func failOnError(err error, msg string) {
@@ -100,12 +101,17 @@ func queueWorker(subs []subList, origins map[string]map[string]string, msgs <-ch
 	var m message
 	fmt.Println("RabbitMQ subprocess started")
 	for d := range msgs {
-		json.Unmarshal(d.Body, &m)
-		for _, sub := range subs {
-			if sub.tag == origins[m.Origin][m.Name] {
-				for _, chatID := range sub.chatIds {
-					message := tgbotapi.NewMessage(chatID, m.Message)
-					bot.Send(message)
+		err := json.Unmarshal(d.Body, &m)
+		if err != nil {
+			log.Println("Unknown json data format!")
+		} else {
+			for _, sub := range subs {
+				if sub.tag == origins[m.Origin][m.Name] {
+					for _, chatID := range sub.chatIds {
+						message := tgbotapi.NewMessage(chatID, m.Message)
+						message.ParseMode = m.Format
+						bot.Send(message)
+					}
 				}
 			}
 		}
